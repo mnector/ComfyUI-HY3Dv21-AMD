@@ -35,17 +35,32 @@ class multiviewDiffusionNet:
         self.cfg = cfg
         self.mode = self.cfg.model.params.stable_diffusion_config.custom_pipeline[2:]
 
-        model_path = huggingface_hub.snapshot_download(
-            repo_id=config.multiview_pretrained_path,
-            allow_patterns=["hunyuan3d-paintpbr-v2-1/*"],
-        )
+        local_diffusers_path = None
+        try:
+            import folder_paths
+            cand = os.path.join(folder_paths.models_dir, "diffusers", "hunyuan3d-paintpbr-v2-1")
+            if os.path.isdir(cand) and os.path.exists(os.path.join(cand, "model_index.json")):
+                local_diffusers_path = cand
+        except Exception:
+            pass
 
-        model_path = os.path.join(model_path, "hunyuan3d-paintpbr-v2-1")
-                
+        if local_diffusers_path is not None:
+            model_path = local_diffusers_path
+        elif os.path.isdir(config.multiview_pretrained_path):
+            cand = os.path.join(config.multiview_pretrained_path, "hunyuan3d-paintpbr-v2-1")
+            model_path = cand if os.path.isdir(cand) else config.multiview_pretrained_path
+        else:
+            model_path = huggingface_hub.snapshot_download(
+                repo_id=config.multiview_pretrained_path,
+                allow_patterns=["hunyuan3d-paintpbr-v2-1/*"],
+            )
+            model_path = os.path.join(model_path, "hunyuan3d-paintpbr-v2-1")
+
         pipeline = HunyuanPaintPipeline.from_pretrained(
             model_path,
             torch_dtype=torch.float16,
-            use_fast=False
+            use_fast=False,
+            trust_remote_code=True,
         )
 
         pipeline.scheduler = EulerAncestralDiscreteScheduler.from_config(pipeline.scheduler.config, timestep_spacing="trailing")

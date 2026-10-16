@@ -18,6 +18,13 @@ import numpy as np
 import torch
 
 
+def safe_matmul(a, b, chunk_size=262144):
+    """Chunk 2D matrix multiplication along dim 0 to avoid ROCm gfx1201 SGEMM corruption above 524,288 rows."""
+    if a.dim() == 2 and a.shape[0] > chunk_size:
+        return torch.cat([torch.matmul(chunk, b) for chunk in a.split(chunk_size, dim=0)], dim=0)
+    return torch.matmul(a, b)
+
+
 def transform_pos(mtx, pos, keepdim=False):
     t_mtx = torch.from_numpy(mtx).to(pos.device) if isinstance(mtx, np.ndarray) else mtx
     if pos.shape[-1] == 3:
@@ -25,10 +32,11 @@ def transform_pos(mtx, pos, keepdim=False):
     else:
         posw = pos
 
+    out = safe_matmul(posw, t_mtx.t())
     if keepdim:
-        return torch.matmul(posw, t_mtx.t())[...]
+        return out[...]
     else:
-        return torch.matmul(posw, t_mtx.t())[None, ...]
+        return out[None, ...]
 
 
 def get_mv_matrix(elev, azim, camera_distance, center=None):

@@ -113,15 +113,33 @@ def export_to_trimesh(mesh_output):
 
 
 def get_obj_from_str(string, reload=False):
+    import sys
     module, cls = string.rsplit(".", 1)
     if reload:
         module_imp = importlib.import_module(module)
         importlib.reload(module_imp)
-    try:
-        obj = getattr(importlib.import_module(module, package=os.path.basename(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))), cls)
-    except:
-        obj = getattr(importlib.import_module(module, package=os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath( __file__ ))))), cls)
-    return obj
+    pkg_root = (__package__ or "").split(".")[0] if __package__ else ""
+    node_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    candidates = []
+    if pkg_root:
+        candidates.append((module, pkg_root))
+    candidates.append((module, os.path.basename(node_root)))
+    candidates.append((module.lstrip("."), None))
+    for mod_name, pkg_name in candidates:
+        try:
+            if pkg_name is None:
+                if node_root not in sys.path:
+                    sys.path.insert(0, node_root)
+                return getattr(importlib.import_module(mod_name), cls)
+            return getattr(importlib.import_module(mod_name, package=pkg_name), cls)
+        except Exception:
+            continue
+    for loaded_name, loaded_mod in list(sys.modules.items()):
+        if loaded_mod is not None and loaded_name.endswith(module):
+            if hasattr(loaded_mod, cls):
+                return getattr(loaded_mod, cls)
+    return getattr(importlib.import_module(module.lstrip(".")), cls)
+
 
 
 def instantiate_from_config(config, **kwargs):

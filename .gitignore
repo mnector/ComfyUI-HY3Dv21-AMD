@@ -1,1 +1,75 @@
-__pycache__
+# ==========================================
+# Git Ignore for ComfyUI-HY3Dv21-AMD
+# Strict filtering for model weights & 3D assets
+# ==========================================
+
+# Python cache & compiled binaries
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyd
+*.so
+*.dll
+*.lib
+*.exp
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# IDE & Editor files
+.vs/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Local private environment files (STRICT)
+.env
+.env.*
+.env.local
+*.local
+*.local.*
+
+# Model weights & Checkpoints (STRICT)
+*.ckpt
+*.safetensors
+*.pth
+*.pt
+*.bin
+*.onnx
+*.gguf
+*.engine
+*.trt
+*.tflite
+
+# Local model folder checkpoint storage (keep .gitkeep)
+hy3dpaint/ckpt/*
+!hy3dpaint/ckpt/.gitkeep
+
+# 3D assets, meshes, point clouds & high-res textures
+*.glb
+*.gltf
+*.obj
+*.fbx
+*.ply
+*.stl
+*.mtl
+*.exr
+*.hdr
+*.blend
+*.blend1
+
+# ComfyUI output & temporary test folders
+temp/
+output/
+outputs/
+*.log
+*.tmp
+
+# System & OS files
+Thumbs.db
+Desktop.ini
+.DS_Store

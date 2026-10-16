@@ -6,10 +6,18 @@ void rasterizeTriangleCPU(int idx, float* vt0, float* vt1, float* vt2, int width
     float y_min = std::min(vt0[1], std::min(vt1[1],vt2[1]));
     float y_max = std::max(vt0[1], std::max(vt1[1],vt2[1]));
 
-    for (int px = x_min; px < x_max + 1; ++px) {
+    if (!std::isfinite(x_min) || !std::isfinite(x_max) || !std::isfinite(y_min) || !std::isfinite(y_max))
+        return;
+
+    int px_start = std::max(0, (int)std::max(x_min, 0.0f));
+    int py_start = std::max(0, (int)std::max(y_min, 0.0f));
+    float px_limit = std::min((float)width, x_max + 1.0f);
+    float py_limit = std::min((float)height, y_max + 1.0f);
+
+    for (int px = px_start; px < px_limit; ++px) {
         if (px < 0 || px >= width)
             continue;
-        for (int py = y_min; py < y_max + 1; ++py) {
+        for (int py = py_start; py < py_limit; ++py) {
             if (py < 0 || py >= height)
                 continue;
             float vt[2] = {px + 0.5f, py + 0.5f};
@@ -126,10 +134,23 @@ std::vector<torch::Tensor> rasterize_image(torch::Tensor V, torch::Tensor F, tor
     int width, int height, float occlusion_truncation, int use_depth_prior)
 {
     int device_id = V.get_device();
-    if (device_id == -1)
-        return rasterize_image_cpu(V, F, D, width, height, occlusion_truncation, use_depth_prior);
-    else
+    if (device_id == -1) {
+        auto v_cpu = V.to(torch::kFloat32).contiguous();
+        auto f_cpu = F.to(torch::kInt32).contiguous();
+        auto d_cpu = use_depth_prior ? D.to(torch::kFloat32).contiguous() : D;
+        return rasterize_image_cpu(v_cpu, f_cpu, d_cpu, width, height, occlusion_truncation, use_depth_prior);
+    } else {
+#if defined(WITH_CUDA_RASTERIZER)
         return rasterize_image_gpu(V, F, D, width, height, occlusion_truncation, use_depth_prior);
+#else
+        auto orig_device = V.device();
+        auto v_cpu = V.to(torch::kCPU, torch::kFloat32).contiguous();
+        auto f_cpu = F.to(torch::kCPU, torch::kInt32).contiguous();
+        auto d_cpu = use_depth_prior ? D.to(torch::kCPU, torch::kFloat32).contiguous() : torch::zeros({0}, torch::kFloat32);
+        auto out = rasterize_image_cpu(v_cpu, f_cpu, d_cpu, width, height, occlusion_truncation, use_depth_prior);
+        return {out[0].to(orig_device), out[1].to(orig_device)};
+#endif
+    }
 }
 
 PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
@@ -137,3 +158,5 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
   m.def("build_hierarchy", &build_hierarchy, "Custom image rasterization");
   m.def("build_hierarchy_with_feat", &build_hierarchy_with_feat, "Custom image rasterization");
 }
+
+

@@ -53,7 +53,13 @@ class _LazyImport:
     def _get(self):
         if self._resolved is None:
             from importlib import import_module
-            self._resolved = getattr(import_module(self._module, __package__), self._attr)
+            import sys
+            if __package__:
+                self._resolved = getattr(import_module(self._module, __package__), self._attr)
+            else:
+                if script_directory not in sys.path:
+                    sys.path.insert(0, script_directory)
+                self._resolved = getattr(import_module(self._module.lstrip(".")), self._attr)
         return self._resolved
 
     def __call__(self, *args, **kwargs):
@@ -78,7 +84,7 @@ Hunyuan3DPaintPipeline = _LazyImport(".hy3dpaint.textureGenPipeline", "Hunyuan3D
 Hunyuan3DPaintConfig = _LazyImport(".hy3dpaint.textureGenPipeline", "Hunyuan3DPaintConfig")
 
 script_directory = os.path.dirname(os.path.abspath(__file__))
-comfy_path = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+comfy_path = getattr(folder_paths, "base_path", os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 diffusions_dir = os.path.join(comfy_path, "models", "diffusers")
 
 def parse_string_to_int_list(number_string):
@@ -300,7 +306,7 @@ class Hy3D21MeshGenerator:
     RETURN_TYPES = ("HY3DLATENT",)
     RETURN_NAMES = ("latents",)
     FUNCTION = "loadmodel"
-    CATEGORY = "Hunyuan3D21Wrapper"
+    CATEGORY = "Hunyuan3D21Wrapper [AMD]"
 
     def loadmodel(self, model, image, steps, guidance_scale, seed, attention_mode):
         device = mm.get_torch_device()
@@ -367,7 +373,7 @@ class Hy3D21MeshGenerator:
     # RETURN_TYPES = ("HY3DLATENT",)
     # RETURN_NAMES = ("latents",)
     # FUNCTION = "loadmodel"
-    # CATEGORY = "Hunyuan3D21Wrapper"
+    # CATEGORY = "Hunyuan3D21Wrapper [AMD]"
 
     # def loadmodel(self, model, steps, guidance_scale, seed, attention_mode, front = None, left = None, back = None, right = None):
         # device = mm.get_torch_device()
@@ -446,7 +452,7 @@ class Hy3DMultiViewsGenerator:
     RETURN_TYPES = ("HY3DPIPELINE", "IMAGE","IMAGE","IMAGE","IMAGE","HY3D21CAMERA","HY3D21METADATA",)
     RETURN_NAMES = ("pipeline", "albedo","mr","positions","normals","camera_config", "metadata")
     FUNCTION = "genmultiviews"
-    CATEGORY = "Hunyuan3D21Wrapper"
+    CATEGORY = "Hunyuan3D21Wrapper [AMD]"
 
     def genmultiviews(self, trimesh, camera_config, view_size, image, steps, guidance_scale, texture_size, unwrap_mesh, seed):
         device = mm.get_torch_device()
@@ -487,7 +493,7 @@ class Hy3DBakeMultiViews:
     RETURN_TYPES = ("HY3DPIPELINE", "NPARRAY", "NPARRAY", "NPARRAY", "NPARRAY", "IMAGE", "IMAGE",)
     RETURN_NAMES = ("pipeline", "albedo", "albedo_mask", "mr", "mr_mask", "albedo_texture", "mr_texture",)
     FUNCTION = "process"
-    CATEGORY = "Hunyuan3D21Wrapper"
+    CATEGORY = "Hunyuan3D21Wrapper [AMD]"
 
     def process(self, pipeline, camera_config, albedo, mr):        
         albedo = convert_tensor_images_to_pil(albedo)
@@ -524,7 +530,7 @@ class Hy3DInPaint:
     RETURN_TYPES = ("IMAGE","IMAGE","TRIMESH", "STRING",)
     RETURN_NAMES = ("albedo", "mr", "trimesh", "output_glb_path")
     FUNCTION = "process"
-    CATEGORY = "Hunyuan3D21Wrapper"
+    CATEGORY = "Hunyuan3D21Wrapper [AMD]"
     OUTPUT_NODE = True
 
     def process(self, pipeline, albedo, albedo_mask, mr, mr_mask, output_mesh_name):
@@ -584,7 +590,7 @@ class Hy3D21CameraConfig:
     RETURN_TYPES = ("HY3D21CAMERA",)
     RETURN_NAMES = ("camera_config",)
     FUNCTION = "process"
-    CATEGORY = "Hunyuan3D21Wrapper"
+    CATEGORY = "Hunyuan3D21Wrapper [AMD]"
 
     def process(self, camera_azimuths, camera_elevations, view_weights, ortho_scale):
         angles_list = list(map(int, camera_azimuths.replace(" ", "").split(',')))
@@ -615,7 +621,7 @@ class Hy3D21VAELoader:
     RETURN_TYPES = ("HY3DVAE",)
     RETURN_NAMES = ("vae",)
     FUNCTION = "loadmodel"
-    CATEGORY = "Hunyuan3D21Wrapper"
+    CATEGORY = "Hunyuan3D21Wrapper [AMD]"
 
     def loadmodel(self, model_name, vae_config=None):
         device = mm.get_torch_device()
@@ -680,7 +686,7 @@ class Hy3D21VAEConfig:
     RETURN_TYPES = ("HY3D21VAECONFIG",)
     RETURN_NAMES = ("vae_config",)
     FUNCTION = "process"
-    CATEGORY = "Hunyuan3D21Wrapper"
+    CATEGORY = "Hunyuan3D21Wrapper [AMD]"
 
     def process(self, num_latents, embed_dim, num_freqs, include_pi, heads, width, num_encoder_layers, num_decoder_layers, qkv_bias, qk_norm, scale_factor, geo_decoder_mlp_expand_ratio, geo_decoder_downsample_ratio, geo_decoder_ln_post, point_feats, pc_size, pc_sharpedge_size):
         vae_config = {
@@ -727,7 +733,7 @@ class Hy3D21VAEDecode:
     RETURN_TYPES = ("TRIMESH",)
     RETURN_NAMES = ("trimesh",)
     FUNCTION = "process"
-    CATEGORY = "Hunyuan3D21Wrapper"
+    CATEGORY = "Hunyuan3D21Wrapper [AMD]"
 
     def process(self, vae, latents, box_v, octree_resolution, mc_level, num_chunks, mc_algo, enable_flash_vdm, force_offload):
         device = mm.get_torch_device()
@@ -783,7 +789,7 @@ class Hy3D21ResizeImages:
     RETURN_TYPES = ("IMAGE",)
     RETURN_NAMES = ("images",)
     FUNCTION = "process"
-    CATEGORY = "Hunyuan3D21Wrapper"
+    CATEGORY = "Hunyuan3D21Wrapper [AMD]"
 
     def process(self, images, width, height, sampling):        
         if sampling=='NEAREST':
@@ -832,7 +838,7 @@ class Hy3D21LoadImageWithTransparency:
                     {"image": (sorted(files), {"image_upload": True})},
                 }
 
-    CATEGORY = "Hunyuan3D21Wrapper"
+    CATEGORY = "Hunyuan3D21Wrapper [AMD]"
 
     RETURN_TYPES = ("IMAGE", "MASK", "IMAGE", )
     RETURN_NAMES = ("image", "mask", "image_with_alpha")
@@ -921,7 +927,7 @@ class Hy3D21PostprocessMesh:
     RETURN_TYPES = ("TRIMESH",)
     RETURN_NAMES = ("trimesh",)
     FUNCTION = "process"
-    CATEGORY = "Hunyuan3D21Wrapper"
+    CATEGORY = "Hunyuan3D21Wrapper [AMD]"
 
     def process(self, trimesh, remove_floaters, remove_degenerate_faces, reduce_faces, max_facenum, smooth_normals):
         new_mesh = trimesh.copy()
@@ -953,7 +959,7 @@ class Hy3D21ExportMesh:
     RETURN_TYPES = ("STRING","STRING","FILE_3D",)
     RETURN_NAMES = ("glb_path","relative_path","model_3d",)
     FUNCTION = "process"
-    CATEGORY = "Hunyuan3D21Wrapper"
+    CATEGORY = "Hunyuan3D21Wrapper [AMD]"
     OUTPUT_NODE = True
 
     def process(self, trimesh, filename_prefix, file_format):        
@@ -993,7 +999,7 @@ class Hy3D21MeshUVWrap:
     RETURN_TYPES = ("TRIMESH", )
     RETURN_NAMES = ("trimesh", )
     FUNCTION = "process"
-    CATEGORY = "Hunyuan3D21Wrapper"
+    CATEGORY = "Hunyuan3D21Wrapper [AMD]"
 
     def process(self, trimesh):
         trimesh = mesh_uv_wrap(trimesh)
@@ -1013,7 +1019,7 @@ class Hy3D21LoadMesh:
     OUTPUT_TOOLTIPS = ("The glb model with mesh to texturize.",)
     
     FUNCTION = "load"
-    CATEGORY = "Hunyuan3D21Wrapper"
+    CATEGORY = "Hunyuan3D21Wrapper [AMD]"
     DESCRIPTION = "Loads a glb model from the given path."
 
     def load(self, glb_path):
@@ -1043,7 +1049,7 @@ class Hy3D21IMRemesh:
     RETURN_TYPES = ("TRIMESH",)
     RETURN_NAMES = ("trimesh",)
     FUNCTION = "remesh"
-    CATEGORY = "Hunyuan3D21Wrapper"
+    CATEGORY = "Hunyuan3D21Wrapper [AMD]"
     DESCRIPTION = "Remeshes the mesh using instant-meshes: https://github.com/wjakob/instant-meshes, Note: this will remove all vertex colors and textures."
 
     def remesh(self, trimesh, merge_vertices, vertex_count, smooth_iter, align_to_boundaries, triangulate_result, max_facenum):
@@ -1106,7 +1112,7 @@ class Hy3D21MeshlibDecimate:
     RETURN_TYPES = ("TRIMESH",)
     RETURN_NAMES = ("trimesh",)
     FUNCTION = "decimate"
-    CATEGORY = "Hunyuan3D21Wrapper"
+    CATEGORY = "Hunyuan3D21Wrapper [AMD]"
     DESCRIPTION = "Decimate the mesh using meshlib: https://meshlib.io/"
 
     def decimate(self, trimesh, subdivideParts, target_face_num=0,target_face_ratio=0.0,strategy="None",maxError=0.0,maxEdgeLen=0.0,maxBdShift=0.0,maxTriangleAspectRatio=0.0,criticalTriAspectRatio=0.0,tinyEdgeLength=0.0,stabilizer=0.0,angleWeightedDistToPlane=False,optimizeVertexPos=False,collapseNearNotFlippable=False,touchNearBdEdges=False,maxAngleChange=0.0,decimateBetweenParts=False,minFacesInPart=0):
@@ -1193,7 +1199,7 @@ class Hy3D21SimpleMeshlibDecimate:
     RETURN_TYPES = ("TRIMESH",)
     RETURN_NAMES = ("trimesh",)
     FUNCTION = "decimate"
-    CATEGORY = "Hunyuan3D21Wrapper"
+    CATEGORY = "Hunyuan3D21Wrapper [AMD]"
     DESCRIPTION = "Decimate the mesh using meshlib: https://meshlib.io/"
 
     def decimate(self, trimesh, subdivideParts, target_face_num=0,target_face_ratio=0.0):
@@ -1263,7 +1269,7 @@ class Hy3D21MeshGenerationBatch:
     RETURN_TYPES = ("STRING","STRING","STRING","STRING",)
     RETURN_NAMES = ("input_folder", "output_folder", "processed_input_images", "processed_output_meshes",)
     FUNCTION = "process"
-    CATEGORY = "Hunyuan3D21Wrapper"
+    CATEGORY = "Hunyuan3D21Wrapper [AMD]"
     DESCRIPTION = "Process all pictures from a folder"
     OUTPUT_NODE = True
 
@@ -1442,7 +1448,7 @@ class Hy3D21GenerateMultiViewsBatch:
     RETURN_TYPES = ("STRING",)
     RETURN_NAMES = ("processed_meshes",)
     FUNCTION = "process"
-    CATEGORY = "Hunyuan3D21Wrapper"
+    CATEGORY = "Hunyuan3D21Wrapper [AMD]"
     DESCRIPTION = "Process all meshes from a folder"
     OUTPUT_NODE = True
 
@@ -1656,7 +1662,7 @@ class Hy3D21UseMultiViews:
     RETURN_TYPES = ("HY3DPIPELINE", "IMAGE","IMAGE","HY3D21CAMERA",)
     RETURN_NAMES = ("pipeline", "albedo","mr","camera_config",)
     FUNCTION = "process"
-    CATEGORY = "Hunyuan3D21Wrapper"
+    CATEGORY = "Hunyuan3D21Wrapper [AMD]"
 
     def process(self, trimesh, camera_config, albedo, mr, view_size, texture_size):
         device = mm.get_torch_device()
@@ -1683,7 +1689,7 @@ class Hy3D21UseMultiViewsFromMetaData:
     RETURN_TYPES = ("HY3DPIPELINE", "IMAGE","IMAGE","HY3D21CAMERA",)
     RETURN_NAMES = ("pipeline", "albedo","mr","camera_config",)
     FUNCTION = "process"
-    CATEGORY = "Hunyuan3D21Wrapper"
+    CATEGORY = "Hunyuan3D21Wrapper [AMD]"
 
     def process(self, trimesh, metadata_file, view_size, texture_size):
         device = mm.get_torch_device()
@@ -1754,7 +1760,7 @@ class Hy3D21MultiViewsGeneratorWithMetaData:
     RETURN_TYPES = ("HY3DPIPELINE", "IMAGE","IMAGE","HY3D21METADATA","IMAGE","IMAGE",)
     RETURN_NAMES = ("pipeline", "albedo","mr","metadata","positions","normals",)
     FUNCTION = "genmultiviews"
-    CATEGORY = "Hunyuan3D21Wrapper"
+    CATEGORY = "Hunyuan3D21Wrapper [AMD]"
 
     def genmultiviews(self, trimesh, camera_config, view_size, image, steps, guidance_scale, texture_size, unwrap_mesh, seed, output_name):
         device = mm.get_torch_device()
@@ -1817,7 +1823,7 @@ class Hy3DBakeMultiViewsWithMetaData:
     RETURN_TYPES = ("IMAGE","IMAGE","TRIMESH", "STRING", )
     RETURN_NAMES = ("albedo", "mr", "trimesh", "output_glb_path", )
     FUNCTION = "process"
-    CATEGORY = "Hunyuan3D21Wrapper"
+    CATEGORY = "Hunyuan3D21Wrapper [AMD]"
 
     def process(self, pipeline, albedo, mr, metadata):  
         vertex_inpaint = True
@@ -1899,7 +1905,7 @@ class Hy3DHighPolyToLowPolyBakeMultiViewsWithMetaData:
     RETURN_TYPES = ("STRING", )
     RETURN_NAMES = ("output_lowpoly_path", )
     FUNCTION = "process"
-    CATEGORY = "Hunyuan3D21Wrapper"
+    CATEGORY = "Hunyuan3D21Wrapper [AMD]"
     OUTPUT_NODE = True
 
     def process(self, metadata_file, view_size, texture_size, target_face_nums):   
@@ -1956,7 +1962,7 @@ class Hy3DHighPolyToLowPolyBakeMultiViewsWithMetaData:
                         albedos.append(albedo)
                         
                     for file in loaded_metaData.mrs:
-                        mr_file = os.path.join(dir_name,file)
+                        mr_file = os.path.join(input_dir,file)
                         mr = Image.open(mr_file)
                         mrs.append(mr)
 
@@ -2016,7 +2022,7 @@ class Hy3D21ModelLoader:
     RETURN_TYPES = ("STRING", "HY3DVAE",)
     RETURN_NAMES = ("model_path", "vae",)
     FUNCTION = "loadmodel"
-    CATEGORY = "Hunyuan3D21Wrapper"
+    CATEGORY = "Hunyuan3D21Wrapper [AMD]"
 
     def loadmodel(self):
         device = mm.get_torch_device()
@@ -2135,7 +2141,7 @@ class Hy3D21MeshGenerator2:
     RETURN_TYPES = ("HY3DLATENT",)
     RETURN_NAMES = ("latents",)
     FUNCTION = "loadmodel"
-    CATEGORY = "Hunyuan3D21Wrapper"
+    CATEGORY = "Hunyuan3D21Wrapper [AMD]"
 
     def loadmodel(self, model_path, image, steps, guidance_scale, seed, attention_mode):
         device = mm.get_torch_device()
@@ -2179,61 +2185,61 @@ class Hy3D21MeshGenerator2:
         return (latents,)        
 
 NODE_CLASS_MAPPINGS = {
-    "Hy3D21MeshGenerator": Hy3D21MeshGenerator,
-    "Hy3DMultiViewsGenerator": Hy3DMultiViewsGenerator,
-    "Hy3DBakeMultiViews": Hy3DBakeMultiViews,
-    "Hy3DInPaint": Hy3DInPaint,
-    "Hy3D21CameraConfig": Hy3D21CameraConfig,
-    "Hy3D21VAELoader": Hy3D21VAELoader,
-    "Hy3D21VAEDecode": Hy3D21VAEDecode,
-    "Hy3D21VAEConfig": Hy3D21VAEConfig,
-    "Hy3D21ResizeImages": Hy3D21ResizeImages,
-    "Hy3D21LoadImageWithTransparency": Hy3D21LoadImageWithTransparency,
-    "Hy3D21PostprocessMesh": Hy3D21PostprocessMesh,
-    "Hy3D21ExportMesh": Hy3D21ExportMesh,
-    "Hy3D21MeshUVWrap": Hy3D21MeshUVWrap,
-    "Hy3D21LoadMesh": Hy3D21LoadMesh,
-    "Hy3D21IMRemesh": Hy3D21IMRemesh,
-    "Hy3D21MeshlibDecimate": Hy3D21MeshlibDecimate,
-    "Hy3D21MeshGenerationBatch": Hy3D21MeshGenerationBatch,
-    "Hy3D21GenerateMultiViewsBatch": Hy3D21GenerateMultiViewsBatch,
-    "Hy3D21UseMultiViews": Hy3D21UseMultiViews,
-    "Hy3D21UseMultiViewsFromMetaData": Hy3D21UseMultiViewsFromMetaData,
-    "Hy3D21MultiViewsGeneratorWithMetaData": Hy3D21MultiViewsGeneratorWithMetaData,
-    "Hy3DBakeMultiViewsWithMetaData": Hy3DBakeMultiViewsWithMetaData,
-    "Hy3DHighPolyToLowPolyBakeMultiViewsWithMetaData": Hy3DHighPolyToLowPolyBakeMultiViewsWithMetaData,
-    "Hy3D21SimpleMeshlibDecimate": Hy3D21SimpleMeshlibDecimate,
-    "Hy3D21ModelLoader": Hy3D21ModelLoader,
-    "Hy3D21MeshGenerator2": Hy3D21MeshGenerator2,
-    #"Hy3D21MultiViewsMeshGenerator": Hy3D21MultiViewsMeshGenerator,
-    }
-    
+    "Hy3D21MeshGenerator_AMD": Hy3D21MeshGenerator,
+    "Hy3DMultiViewsGenerator_AMD": Hy3DMultiViewsGenerator,
+    "Hy3DBakeMultiViews_AMD": Hy3DBakeMultiViews,
+    "Hy3DInPaint_AMD": Hy3DInPaint,
+    "Hy3D21CameraConfig_AMD": Hy3D21CameraConfig,
+    "Hy3D21VAELoader_AMD": Hy3D21VAELoader,
+    "Hy3D21VAEDecode_AMD": Hy3D21VAEDecode,
+    "Hy3D21VAEConfig_AMD": Hy3D21VAEConfig,
+    "Hy3D21ResizeImages_AMD": Hy3D21ResizeImages,
+    "Hy3D21LoadImageWithTransparency_AMD": Hy3D21LoadImageWithTransparency,
+    "Hy3D21PostprocessMesh_AMD": Hy3D21PostprocessMesh,
+    "Hy3D21ExportMesh_AMD": Hy3D21ExportMesh,
+    "Hy3D21MeshUVWrap_AMD": Hy3D21MeshUVWrap,
+    "Hy3D21LoadMesh_AMD": Hy3D21LoadMesh,
+    "Hy3D21IMRemesh_AMD": Hy3D21IMRemesh,
+    "Hy3D21MeshlibDecimate_AMD": Hy3D21MeshlibDecimate,
+    "Hy3D21MeshGenerationBatch_AMD": Hy3D21MeshGenerationBatch,
+    "Hy3D21GenerateMultiViewsBatch_AMD": Hy3D21GenerateMultiViewsBatch,
+    "Hy3D21UseMultiViews_AMD": Hy3D21UseMultiViews,
+    "Hy3D21UseMultiViewsFromMetaData_AMD": Hy3D21UseMultiViewsFromMetaData,
+    "Hy3D21MultiViewsGeneratorWithMetaData_AMD": Hy3D21MultiViewsGeneratorWithMetaData,
+    "Hy3DBakeMultiViewsWithMetaData_AMD": Hy3DBakeMultiViewsWithMetaData,
+    "Hy3DHighPolyToLowPolyBakeMultiViewsWithMetaData_AMD": Hy3DHighPolyToLowPolyBakeMultiViewsWithMetaData,
+    "Hy3D21SimpleMeshlibDecimate_AMD": Hy3D21SimpleMeshlibDecimate,
+    "Hy3D21ModelLoader_AMD": Hy3D21ModelLoader,
+    "Hy3D21MeshGenerator2_AMD": Hy3D21MeshGenerator2,
+    #"Hy3D21MultiViewsMeshGenerator_AMD": Hy3D21MultiViewsMeshGenerator,
+}
+
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "Hy3D21MeshGenerator": "Hunyuan 3D 2.1 Mesh Generator",
-    "Hy3DMultiViewsGenerator": "Hunyuan 3D 2.1 MultiViews Generator",
-    "Hy3DBakeMultiViews": "Hunyuan 3D 2.1 Bake MultiViews",
-    "Hy3DInPaint": "Hunyuan 3D 2.1 InPaint",
-    "Hy3D21CameraConfig": "Hunyuan 3D 2.1 Camera Config",
-    "Hy3D21VAELoader": "Hunyuan 3D 2.1 VAE Loader",
-    "Hy3D21VAEDecode": "Hunyuan 3D 2.1 VAE Decoder",
-    "Hy3D21VAEConfig": "Hunyuan 3D 2.1 VAE Config",
-    "Hy3D21ResizeImages": "Hunyuan 3D 2.1 Resize Images",
-    "Hy3D21LoadImageWithTransparency": "Hunyuan 3D 2.1 Load Image with Transparency",
-    "Hy3D21PostprocessMesh": "Hunyuan 3D 2.1 Post Process Trimesh",
-    "Hy3D21ExportMesh": "Hunyuan 3D 2.1 Export Mesh",
-    "Hy3D21MeshUVWrap": "Hunyuan 3D 2.1 Mesh UV Wrap",
-    "Hy3D21LoadMesh": "Hunyuan 3D 2.1 Load Mesh",
-    "Hy3D21IMRemesh": "Hunyuan 3D 2.1 Instant-Meshes Remesh",
-    "Hy3D21MeshlibDecimate": "Hunyuan 3D 2.1 Meshlib Decimation",
-    "Hy3D21MeshGenerationBatch": "Hunyuan 3D 2.1 Mesh Generator from Folder",
-    "Hy3D21GenerateMultiViewsBatch": "Hunyuan 3D 2.1 MultiViews Generator Batch",
-    "Hy3D21UseMultiViews": "Hunyuan 3D 2.1 Use MultiViews",
-    "Hy3D21UseMultiViewsFromMetaData": "Hunyuan 3D 2.1 Use MultiViews From MetaData",
-    "Hy3D21MultiViewsGeneratorWithMetaData": "Hunyuan 3D 2.1 MultiViews Generator With MetaData",
-    "Hy3DBakeMultiViewsWithMetaData": "Hunyuan 3D 2.1 Bake MultiViews With MetaData",
-    "Hy3DHighPolyToLowPolyBakeMultiViewsWithMetaData": "Hunyuan 3D 2.1 HighPoly to LowPoly Bake MultiViews With MetaData",
-    "Hy3D21SimpleMeshlibDecimate": "Hunyuan 3D 2.1 Simple Meshlib Decimation",
-    "Hy3D21ModelLoader": "Hunyuan 3D 2.1 - Model Loader",
-    "Hy3D21MeshGenerator2": "Hunyuan 3D 2.1 Mesh Generator2",
-    #"Hy3D21MultiViewsMeshGenerator": "Hunyuan 3D 2.1 MultiViews Mesh Generator"
-    }
+    "Hy3D21MeshGenerator_AMD": "Hunyuan 3D 2.1 Mesh Generator [AMD]",
+    "Hy3DMultiViewsGenerator_AMD": "Hunyuan 3D 2.1 MultiViews Generator [AMD]",
+    "Hy3DBakeMultiViews_AMD": "Hunyuan 3D 2.1 Bake MultiViews [AMD]",
+    "Hy3DInPaint_AMD": "Hunyuan 3D 2.1 InPaint [AMD]",
+    "Hy3D21CameraConfig_AMD": "Hunyuan 3D 2.1 Camera Config [AMD]",
+    "Hy3D21VAELoader_AMD": "Hunyuan 3D 2.1 VAE Loader [AMD]",
+    "Hy3D21VAEDecode_AMD": "Hunyuan 3D 2.1 VAE Decoder [AMD]",
+    "Hy3D21VAEConfig_AMD": "Hunyuan 3D 2.1 VAE Config [AMD]",
+    "Hy3D21ResizeImages_AMD": "Hunyuan 3D 2.1 Resize Images [AMD]",
+    "Hy3D21LoadImageWithTransparency_AMD": "Hunyuan 3D 2.1 Load Image with Transparency [AMD]",
+    "Hy3D21PostprocessMesh_AMD": "Hunyuan 3D 2.1 Post Process Trimesh [AMD]",
+    "Hy3D21ExportMesh_AMD": "Hunyuan 3D 2.1 Export Mesh [AMD]",
+    "Hy3D21MeshUVWrap_AMD": "Hunyuan 3D 2.1 Mesh UV Wrap [AMD]",
+    "Hy3D21LoadMesh_AMD": "Hunyuan 3D 2.1 Load Mesh [AMD]",
+    "Hy3D21IMRemesh_AMD": "Hunyuan 3D 2.1 Instant-Meshes Remesh [AMD]",
+    "Hy3D21MeshlibDecimate_AMD": "Hunyuan 3D 2.1 Meshlib Decimation [AMD]",
+    "Hy3D21MeshGenerationBatch_AMD": "Hunyuan 3D 2.1 Mesh Generator from Folder [AMD]",
+    "Hy3D21GenerateMultiViewsBatch_AMD": "Hunyuan 3D 2.1 MultiViews Generator Batch [AMD]",
+    "Hy3D21UseMultiViews_AMD": "Hunyuan 3D 2.1 Use MultiViews [AMD]",
+    "Hy3D21UseMultiViewsFromMetaData_AMD": "Hunyuan 3D 2.1 Use MultiViews From MetaData [AMD]",
+    "Hy3D21MultiViewsGeneratorWithMetaData_AMD": "Hunyuan 3D 2.1 MultiViews Generator With MetaData [AMD]",
+    "Hy3DBakeMultiViewsWithMetaData_AMD": "Hunyuan 3D 2.1 Bake MultiViews With MetaData [AMD]",
+    "Hy3DHighPolyToLowPolyBakeMultiViewsWithMetaData_AMD": "Hunyuan 3D 2.1 HighPoly to LowPoly Bake MultiViews With MetaData [AMD]",
+    "Hy3D21SimpleMeshlibDecimate_AMD": "Hunyuan 3D 2.1 Simple Meshlib Decimation [AMD]",
+    "Hy3D21ModelLoader_AMD": "Hunyuan 3D 2.1 - Model Loader [AMD]",
+    "Hy3D21MeshGenerator2_AMD": "Hunyuan 3D 2.1 Mesh Generator2 [AMD]",
+    #"Hy3D21MultiViewsMeshGenerator_AMD": "Hunyuan 3D 2.1 MultiViews Mesh Generator [AMD]"
+}

@@ -2,9 +2,23 @@
 #define RASTERIZER_H_
 
 #include <torch/extension.h>
+#ifdef _MSC_VER
+#pragma comment(linker, "/ALTERNATENAME:__imp_??0ValueError@c10@@QEAA@USourceLocation@1@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z=__imp_??0Error@c10@@QEAA@USourceLocation@1@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z")
+#endif
 #include <vector>
+#include <cmath>
 #include <ATen/ATen.h>
+#if defined(WITH_CUDA_RASTERIZER)
 #include <ATen/cuda/CUDAContext.h> // For CUDA context
+#endif
+#if !defined(__CUDACC__) && !defined(__HIPCC__)
+#ifndef __host__
+#define __host__
+#endif
+#ifndef __device__
+#define __device__
+#endif
+#endif
 #include <cstdint>
 #define INT64 uint64_t
 #define MAXINT 2147483647

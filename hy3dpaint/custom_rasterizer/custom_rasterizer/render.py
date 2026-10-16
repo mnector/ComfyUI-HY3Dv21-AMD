@@ -12,16 +12,61 @@
 # fine-tuning enabling code and other elements of the foregoing made publicly available
 # by Tencent in accordance with TENCENT HUNYUAN COMMUNITY LICENSE AGREEMENT.
 
-import custom_rasterizer_kernel
+import os
 import torch
+from . import torch_backend
+
+try:
+    import custom_rasterizer_kernel as _cr_kernel
+except Exception:
+    _cr_kernel = None
+
+_FORCE_TORCH_BACKEND = os.environ.get("HY3D_RASTER_BACKEND", "").lower() == "torch"
+_FORCE_CPU_FALLBACK = os.environ.get("HY3D_RASTER_BACKEND", "").lower() == "cpu"
 
 
 def rasterize(pos, tri, resolution, clamp_depth=torch.zeros(0), use_depth_prior=0):
     assert pos.device == tri.device
-    findices, barycentric = custom_rasterizer_kernel.rasterize_image(
-        pos[0], tri, clamp_depth, resolution[1], resolution[0], 1e-6, use_depth_prior
-    )
-    return findices, barycentric
+    orig_device = pos.device
+    v = pos[0]
+
+    if not _FORCE_TORCH_BACKEND and _cr_kernel is not None:
+        if _FORCE_CPU_FALLBACK:
+            v_cpu = v.detach().to("cpu", dtype=torch.float32).contiguous()
+            tri_cpu = tri.detach().to("cpu", dtype=torch.int32).contiguous()
+            d_cpu = clamp_depth.detach().to("cpu", dtype=torch.float32).contiguous() if use_depth_prior else torch.zeros(0, dtype=torch.float32)
+            findices, barycentric = _cr_kernel.rasterize_image(
+                v_cpu, tri_cpu, d_cpu, int(resolution[1]), int(resolution[0]), 1e-6, int(use_depth_prior)
+            )
+            return findices.to(orig_device), barycentric.to(orig_device)
+
+        try:
+            findices, barycentric = _cr_kernel.rasterize_image(
+                v, tri, clamp_depth, int(resolution[1]), int(resolution[0]), 1e-6, int(use_depth_prior)
+            )
+            return findices.to(orig_device), barycentric.to(orig_device)
+        except Exception:
+            try:
+                v_cpu = v.detach().to("cpu", dtype=torch.float32).contiguous()
+                tri_cpu = tri.detach().to("cpu", dtype=torch.int32).contiguous()
+                d_cpu = clamp_depth.detach().to("cpu", dtype=torch.float32).contiguous() if use_depth_prior else torch.zeros(0, dtype=torch.float32)
+                findices, barycentric = _cr_kernel.rasterize_image(
+                    v_cpu, tri_cpu, d_cpu, int(resolution[1]), int(resolution[0]), 1e-6, int(use_depth_prior)
+                )
+                return findices.to(orig_device), barycentric.to(orig_device)
+            except Exception:
+                pass
+
+    try:
+        findices, barycentric = torch_backend.rasterize_image(
+            v, tri, clamp_depth, int(resolution[1]), int(resolution[0]), 1e-6, int(use_depth_prior)
+        )
+        return findices.to(orig_device), barycentric.to(orig_device)
+    except Exception:
+        findices, barycentric = torch_backend.rasterize_image(
+            v.detach().cpu(), tri.detach().cpu(), clamp_depth.detach().cpu(), int(resolution[1]), int(resolution[0]), 1e-6, int(use_depth_prior)
+        )
+        return findices.to(orig_device), barycentric.to(orig_device)
 
 
 def interpolate(col, findices, barycentric, tri):

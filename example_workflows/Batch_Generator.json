@@ -6,7 +6,7 @@
   "nodes": [
     {
       "id": 6,
-      "type": "Hy3D21CameraConfig",
+      "type": "Hy3D21CameraConfig_AMD",
       "pos": [
         -706.4094848632812,
         305.74383544921875
@@ -31,7 +31,7 @@
       "properties": {
         "aux_id": "visualbruno/ComfyUI-Hunyuan3d-2-1",
         "ver": "e439689e4b67fb2af5f487ee26ef3a710be92658",
-        "Node name for S&R": "Hy3D21CameraConfig",
+        "Node name for S&R": "Hy3D21CameraConfig_AMD",
         "widget_ue_connectable": {}
       },
       "widgets_values": [
@@ -43,7 +43,7 @@
     },
     {
       "id": 4,
-      "type": "Hy3D21MeshGenerationBatch",
+      "type": "Hy3D21MeshGenerationBatch_AMD",
       "pos": [
         -732.0762939453125,
         516.9437255859375
@@ -85,12 +85,12 @@
       "properties": {
         "aux_id": "visualbruno/ComfyUI-Hunyuan3d-2-1",
         "ver": "a1133c7ff88dd2b8c6a85344ffe7acbaa58ec8d4",
-        "Node name for S&R": "Hy3D21MeshGenerationBatch",
+        "Node name for S&R": "Hy3D21MeshGenerationBatch_AMD",
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "C:\\Travaux\\Test",
-        "C:\\Travaux\\Test\\3D",
+        "input/batch_test",
+        "output/3D",
         "Hunyuan3D-vae-v2-1-fp16.ckpt",
         "hunyuan3d-dit-v2-1-fp16.ckpt",
         50,
@@ -115,7 +115,7 @@
     },
     {
       "id": 5,
-      "type": "Hy3D21GenerateMultiViewsBatch",
+      "type": "Hy3D21GenerateMultiViewsBatch_AMD",
       "pos": [
         -167.3360137939453,
         428.5770568847656
@@ -162,11 +162,11 @@
       "properties": {
         "aux_id": "visualbruno/ComfyUI-Hunyuan3d-2-1",
         "ver": "f966762862e112b35dfe2e846bfb153f0dd6cae4",
-        "Node name for S&R": "Hy3D21GenerateMultiViewsBatch",
+        "Node name for S&R": "Hy3D21GenerateMultiViewsBatch_AMD",
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "C:\\Travaux\\Test\\Meshes",
+        "output/Meshes",
         512,
         10,
         3,

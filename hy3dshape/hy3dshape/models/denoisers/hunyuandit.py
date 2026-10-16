@@ -22,6 +22,7 @@
 # fine-tuning enabling code and other elements of the foregoing made publicly available
 # by Tencent in accordance with TENCENT HUNYUAN COMMUNITY LICENSE AGREEMENT.
 
+import contextlib
 import math
 
 import numpy as np
@@ -31,6 +32,16 @@ import torch.nn.functional as F
 from einops import rearrange
 
 from .moe_layers import MoEBlock
+
+
+def _sdpa_ctx():
+    try:
+        from torch.nn.attention import sdpa_kernel, SDPBackend
+        return sdpa_kernel([SDPBackend.FLASH_ATTENTION, SDPBackend.EFFICIENT_ATTENTION, SDPBackend.MATH])
+    except Exception:
+        if hasattr(torch.backends, "cuda") and hasattr(torch.backends.cuda, "sdp_kernel"):
+            return torch.backends.cuda.sdp_kernel(enable_flash=True, enable_math=True, enable_mem_efficient=True)
+        return contextlib.nullcontext()
 
 
 def modulate(x, shift, scale):
@@ -209,22 +220,14 @@ class CrossAttention(nn.Module):
         q = self.q_norm(q)
         k = self.k_norm(k)
 
-        with torch.backends.cuda.sdp_kernel(
-            enable_flash=True,
-            enable_math=False,
-            enable_mem_efficient=True
-        ):
+        with _sdpa_ctx():
             q, k, v = map(lambda t: rearrange(t, 'b n h d -> b h n d', h=self.num_heads), (q, k, v))
             context = F.scaled_dot_product_attention(
                 q, k, v
             ).transpose(1, 2).reshape(b, s1, -1)
 
         if self.with_dca:
-            with torch.backends.cuda.sdp_kernel(
-                enable_flash=True,
-                enable_math=False,
-                enable_mem_efficient=True
-            ):
+            with _sdpa_ctx():
                 k_dca, v_dca = map(lambda t: rearrange(t, 'b n h d -> b h n d', h=self.num_heads),
                                    (k_dca, v_dca))
                 context_dca = F.scaled_dot_product_attention(
@@ -286,11 +289,7 @@ class Attention(nn.Module):
         q = self.q_norm(q)  # [b, h, s, d]
         k = self.k_norm(k)  # [b, h, s, d]
 
-        with torch.backends.cuda.sdp_kernel(
-            enable_flash=True,
-            enable_math=False,
-            enable_mem_efficient=True
-        ):
+        with _sdpa_ctx():
             x = F.scaled_dot_product_attention(q, k, v)
             x = x.transpose(1, 2).reshape(B, N, -1)
 

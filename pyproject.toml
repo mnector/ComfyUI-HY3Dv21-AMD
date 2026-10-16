@@ -1,0 +1,13 @@
+[project]
+name = "ComfyUI-HY3Dv21-AMD"
+description = "ComfyUI Hunyuan3D 2.1 (Shape + Paint PBR) adapted for Windows AMD GPUs (ZLUDA / ROCm)"
+version = "1.0.0"
+license = { text = "TENCENT HUNYUAN NON-COMMERCIAL LICENSE AGREEMENT" }
+
+[project.urls]
+Repository = "https://github.com/visualbruno/ComfyUI-Hunyuan3d-2-1"
+
+[tool.comfy]
+PublisherId = "visualbruno-amd"
+DisplayName = "ComfyUI-HY3Dv21-AMD"
+Icon = ""

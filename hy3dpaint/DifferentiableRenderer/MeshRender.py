@@ -901,7 +901,7 @@ class MeshRender:
             sRGB corrected image in same format as input
         """
         if isinstance(image, Image.Image):
-            image_rgb = torch.tesnor(np.array(image) / 255.0).float().to(self.device)
+            image_rgb = torch.tensor(np.array(image) / 255.0).float().to(self.device)
         elif isinstance(image, np.ndarray):
             image_rgb = torch.tensor(image).float()
         else:
@@ -1197,13 +1197,19 @@ class MeshRender:
             kernel_size = self.bake_unreliable_kernel_size * 2 + 1
             kernel = torch.ones((1, 1, kernel_size, kernel_size), dtype=torch.float32).to(sketch_image.device)
 
+            def _safe_conv2d(inp, w, padding):
+                try:
+                    return F.conv2d(inp.contiguous(), w.contiguous(), padding=padding)
+                except Exception:
+                    return F.conv2d(inp.detach().cpu().float(), w.detach().cpu().float(), padding=padding).to(inp.device)
+
             visible_mask = visible_mask.permute(2, 0, 1).unsqueeze(0).float()
-            visible_mask = F.conv2d(1.0 - visible_mask, kernel, padding=kernel_size // 2)
+            visible_mask = _safe_conv2d(1.0 - visible_mask, kernel, padding=kernel_size // 2)
             visible_mask = 1.0 - (visible_mask > 0).float()  # 二值化
             visible_mask = visible_mask.squeeze(0).permute(1, 2, 0)
 
-            sketch_image = sketch_image.permute(2, 0, 1).unsqueeze(0)
-            sketch_image = F.conv2d(sketch_image, kernel, padding=kernel_size // 2)
+            sketch_image = sketch_image.permute(2, 0, 1).unsqueeze(0).float()
+            sketch_image = _safe_conv2d(sketch_image, kernel, padding=kernel_size // 2)
             sketch_image = (sketch_image > 0).float()  # 二值化
             sketch_image = sketch_image.squeeze(0).permute(1, 2, 0)
             visible_mask = visible_mask * (sketch_image < 0.5)
@@ -1251,7 +1257,14 @@ class MeshRender:
                 np.array(((proj[0, 0], 0, 0, 0), (0, proj[1, 1], 0, 0), (0, 0, 1, 0), (0, 0, 0, 1)))
             ).to(self.tex_position)
             w2c = torch.from_numpy(r_mv).to(self.tex_position)
-            v_proj = self.tex_position @ w2c.T @ img_proj
+            proj_mtx = w2c.T @ img_proj
+            if self.tex_position.shape[0] > 262144:
+                v_proj = torch.cat(
+                    [chunk @ proj_mtx for chunk in self.tex_position.split(262144, dim=0)],
+                    dim=0,
+                )
+            else:
+                v_proj = self.tex_position @ proj_mtx
             inner_mask = (v_proj[:, 0] <= 1.0) & (v_proj[:, 0] >= -1.0) & (v_proj[:, 1] <= 1.0) & (v_proj[:, 1] >= -1.0)
             inner_valid_idx = torch.where(inner_mask)[0].long()
             img_x = torch.clamp(

@@ -6,7 +6,7 @@
   "nodes": [
     {
       "id": 6,
-      "type": "Hy3DBakeMultiViews",
+      "type": "Hy3DBakeMultiViews_AMD",
       "pos": [
         525.63525390625,
         1125.5328369140625
@@ -90,14 +90,14 @@
       "properties": {
         "aux_id": "visualbruno/ComfyUI-Hunyuan3d-2-1",
         "ver": "e439689e4b67fb2af5f487ee26ef3a710be92658",
-        "Node name for S&R": "Hy3DBakeMultiViews",
+        "Node name for S&R": "Hy3DBakeMultiViews_AMD",
         "widget_ue_connectable": {}
       },
       "widgets_values": []
     },
     {
       "id": 2,
-      "type": "Hy3D21MeshUVWrap",
+      "type": "Hy3D21MeshUVWrap_AMD",
       "pos": [
         -138.9613037109375,
         992.260498046875
@@ -128,7 +128,7 @@
       "properties": {
         "aux_id": "visualbruno/ComfyUI-Hunyuan3d-2-1",
         "ver": "b25dbd8bc1adb6e1e699c3a2740d3a2358ee4752",
-        "Node name for S&R": "Hy3D21MeshUVWrap",
+        "Node name for S&R": "Hy3D21MeshUVWrap_AMD",
         "widget_ue_connectable": {}
       },
       "widgets_values": []
@@ -169,7 +169,7 @@
         }
       ],
       "properties": {
-        "cnr_id": "comfy-core",
+        "cnr_id": "ComfyUI-HY3Dv21-AMD",
         "ver": "0.3.31",
         "Node name for S&R": "ImageBatch",
         "widget_ue_connectable": {}
@@ -212,7 +212,7 @@
         }
       ],
       "properties": {
-        "cnr_id": "comfy-core",
+        "cnr_id": "ComfyUI-HY3Dv21-AMD",
         "ver": "0.3.31",
         "Node name for S&R": "ImageBatch",
         "widget_ue_connectable": {}
@@ -255,7 +255,7 @@
         }
       ],
       "properties": {
-        "cnr_id": "comfy-core",
+        "cnr_id": "ComfyUI-HY3Dv21-AMD",
         "ver": "0.3.31",
         "Node name for S&R": "ImageBatch",
         "widget_ue_connectable": {}
@@ -298,7 +298,7 @@
         }
       ],
       "properties": {
-        "cnr_id": "comfy-core",
+        "cnr_id": "ComfyUI-HY3Dv21-AMD",
         "ver": "0.3.31",
         "Node name for S&R": "ImageBatch",
         "widget_ue_connectable": {}
@@ -341,7 +341,7 @@
         }
       ],
       "properties": {
-        "cnr_id": "comfy-core",
+        "cnr_id": "ComfyUI-HY3Dv21-AMD",
         "ver": "0.3.31",
         "Node name for S&R": "ImageBatch",
         "widget_ue_connectable": {}
@@ -384,7 +384,7 @@
         }
       ],
       "properties": {
-        "cnr_id": "comfy-core",
+        "cnr_id": "ComfyUI-HY3Dv21-AMD",
         "ver": "0.3.31",
         "Node name for S&R": "ImageBatch",
         "widget_ue_connectable": {}
@@ -427,7 +427,7 @@
         }
       ],
       "properties": {
-        "cnr_id": "comfy-core",
+        "cnr_id": "ComfyUI-HY3Dv21-AMD",
         "ver": "0.3.31",
         "Node name for S&R": "ImageBatch",
         "widget_ue_connectable": {}
@@ -470,7 +470,7 @@
         }
       ],
       "properties": {
-        "cnr_id": "comfy-core",
+        "cnr_id": "ComfyUI-HY3Dv21-AMD",
         "ver": "0.3.31",
         "Node name for S&R": "ImageBatch",
         "widget_ue_connectable": {}
@@ -513,7 +513,7 @@
         }
       ],
       "properties": {
-        "cnr_id": "comfy-core",
+        "cnr_id": "ComfyUI-HY3Dv21-AMD",
         "ver": "0.3.31",
         "Node name for S&R": "ImageBatch",
         "widget_ue_connectable": {}
@@ -556,7 +556,7 @@
         }
       ],
       "properties": {
-        "cnr_id": "comfy-core",
+        "cnr_id": "ComfyUI-HY3Dv21-AMD",
         "ver": "0.3.31",
         "Node name for S&R": "ImageBatch",
         "widget_ue_connectable": {}
@@ -599,7 +599,7 @@
         }
       ],
       "properties": {
-        "cnr_id": "comfy-core",
+        "cnr_id": "ComfyUI-HY3Dv21-AMD",
         "ver": "0.3.31",
         "Node name for S&R": "ImageBatch",
         "widget_ue_connectable": {}
@@ -642,7 +642,7 @@
         }
       ],
       "properties": {
-        "cnr_id": "comfy-core",
+        "cnr_id": "ComfyUI-HY3Dv21-AMD",
         "ver": "0.3.31",
         "Node name for S&R": "ImageBatch",
         "widget_ue_connectable": {}
@@ -685,7 +685,7 @@
         }
       ],
       "properties": {
-        "cnr_id": "comfy-core",
+        "cnr_id": "ComfyUI-HY3Dv21-AMD",
         "ver": "0.3.31",
         "Node name for S&R": "ImageBatch",
         "widget_ue_connectable": {}
@@ -728,7 +728,7 @@
         }
       ],
       "properties": {
-        "cnr_id": "comfy-core",
+        "cnr_id": "ComfyUI-HY3Dv21-AMD",
         "ver": "0.3.31",
         "Node name for S&R": "ImageBatch",
         "widget_ue_connectable": {}
@@ -737,7 +737,7 @@
     },
     {
       "id": 3,
-      "type": "Hy3D21CameraConfig",
+      "type": "Hy3D21CameraConfig_AMD",
       "pos": [
         -454.242919921875,
         1149.0377197265625
@@ -763,7 +763,7 @@
       "properties": {
         "aux_id": "visualbruno/ComfyUI-Hunyuan3d-2-1",
         "ver": "e439689e4b67fb2af5f487ee26ef3a710be92658",
-        "Node name for S&R": "Hy3D21CameraConfig",
+        "Node name for S&R": "Hy3D21CameraConfig_AMD",
         "widget_ue_connectable": {}
       },
       "widgets_values": [
@@ -775,7 +775,7 @@
     },
     {
       "id": 1,
-      "type": "Hy3D21LoadMesh",
+      "type": "Hy3D21LoadMesh_AMD",
       "pos": [
         -476.08575439453125,
         989.0039672851562
@@ -800,11 +800,11 @@
       "properties": {
         "aux_id": "visualbruno/ComfyUI-Hunyuan3d-2-1",
         "ver": "b25dbd8bc1adb6e1e699c3a2740d3a2358ee4752",
-        "Node name for S&R": "Hy3D21LoadMesh",
+        "Node name for S&R": "Hy3D21LoadMesh_AMD",
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "C:\\Git\\ComfyUI\\output\\Centurion_10K.obj"
+        "output/Centurion_10K.obj"
       ]
     },
     {
@@ -840,7 +840,7 @@
       ],
       "title": "Front",
       "properties": {
-        "cnr_id": "comfy-core",
+        "cnr_id": "ComfyUI-HY3Dv21-AMD",
         "ver": "0.3.31",
         "Node name for S&R": "LoadImage",
         "widget_ue_connectable": {
@@ -884,7 +884,7 @@
       ],
       "title": "Left",
       "properties": {
-        "cnr_id": "comfy-core",
+        "cnr_id": "ComfyUI-HY3Dv21-AMD",
         "ver": "0.3.31",
         "Node name for S&R": "LoadImage",
         "widget_ue_connectable": {
@@ -928,7 +928,7 @@
       ],
       "title": "Back",
       "properties": {
-        "cnr_id": "comfy-core",
+        "cnr_id": "ComfyUI-HY3Dv21-AMD",
         "ver": "0.3.31",
         "Node name for S&R": "LoadImage",
         "widget_ue_connectable": {
@@ -972,7 +972,7 @@
       ],
       "title": "Right",
       "properties": {
-        "cnr_id": "comfy-core",
+        "cnr_id": "ComfyUI-HY3Dv21-AMD",
         "ver": "0.3.31",
         "Node name for S&R": "LoadImage",
         "widget_ue_connectable": {
@@ -1016,7 +1016,7 @@
       ],
       "title": "Top",
       "properties": {
-        "cnr_id": "comfy-core",
+        "cnr_id": "ComfyUI-HY3Dv21-AMD",
         "ver": "0.3.31",
         "Node name for S&R": "LoadImage",
         "widget_ue_connectable": {
@@ -1060,7 +1060,7 @@
       ],
       "title": "Bottom",
       "properties": {
-        "cnr_id": "comfy-core",
+        "cnr_id": "ComfyUI-HY3Dv21-AMD",
         "ver": "0.3.31",
         "Node name for S&R": "LoadImage",
         "widget_ue_connectable": {
@@ -1103,7 +1103,7 @@
         }
       ],
       "properties": {
-        "cnr_id": "comfy-core",
+        "cnr_id": "ComfyUI-HY3Dv21-AMD",
         "ver": "0.3.31",
         "Node name for S&R": "LoadImage",
         "widget_ue_connectable": {
@@ -1146,7 +1146,7 @@
         }
       ],
       "properties": {
-        "cnr_id": "comfy-core",
+        "cnr_id": "ComfyUI-HY3Dv21-AMD",
         "ver": "0.3.31",
         "Node name for S&R": "LoadImage",
         "widget_ue_connectable": {
@@ -1192,7 +1192,7 @@
       ],
       "title": "Front",
       "properties": {
-        "cnr_id": "comfy-core",
+        "cnr_id": "ComfyUI-HY3Dv21-AMD",
         "ver": "0.3.31",
         "Node name for S&R": "LoadImage",
         "widget_ue_connectable": {
@@ -1236,7 +1236,7 @@
       ],
       "title": "Left",
       "properties": {
-        "cnr_id": "comfy-core",
+        "cnr_id": "ComfyUI-HY3Dv21-AMD",
         "ver": "0.3.31",
         "Node name for S&R": "LoadImage",
         "widget_ue_connectable": {
@@ -1280,7 +1280,7 @@
       ],
       "title": "Back",
       "properties": {
-        "cnr_id": "comfy-core",
+        "cnr_id": "ComfyUI-HY3Dv21-AMD",
         "ver": "0.3.31",
         "Node name for S&R": "LoadImage",
         "widget_ue_connectable": {
@@ -1324,7 +1324,7 @@
       ],
       "title": "Right",
       "properties": {
-        "cnr_id": "comfy-core",
+        "cnr_id": "ComfyUI-HY3Dv21-AMD",
         "ver": "0.3.31",
         "Node name for S&R": "LoadImage",
         "widget_ue_connectable": {
@@ -1368,7 +1368,7 @@
       ],
       "title": "Top",
       "properties": {
-        "cnr_id": "comfy-core",
+        "cnr_id": "ComfyUI-HY3Dv21-AMD",
         "ver": "0.3.31",
         "Node name for S&R": "LoadImage",
         "widget_ue_connectable": {
@@ -1412,7 +1412,7 @@
       ],
       "title": "Bottom",
       "properties": {
-        "cnr_id": "comfy-core",
+        "cnr_id": "ComfyUI-HY3Dv21-AMD",
         "ver": "0.3.31",
         "Node name for S&R": "LoadImage",
         "widget_ue_connectable": {
@@ -1455,7 +1455,7 @@
         }
       ],
       "properties": {
-        "cnr_id": "comfy-core",
+        "cnr_id": "ComfyUI-HY3Dv21-AMD",
         "ver": "0.3.31",
         "Node name for S&R": "LoadImage",
         "widget_ue_connectable": {
@@ -1498,7 +1498,7 @@
         }
       ],
       "properties": {
-        "cnr_id": "comfy-core",
+        "cnr_id": "ComfyUI-HY3Dv21-AMD",
         "ver": "0.3.31",
         "Node name for S&R": "LoadImage",
         "widget_ue_connectable": {
@@ -1513,7 +1513,7 @@
     },
     {
       "id": 10,
-      "type": "Hy3D21UseMultiViews",
+      "type": "Hy3D21UseMultiViews_AMD",
       "pos": [
         126.38880920410156,
         1129.649658203125
@@ -1573,7 +1573,7 @@
       "properties": {
         "aux_id": "visualbruno/ComfyUI-Hunyuan3d-2-1",
         "ver": "208445d3b32d3781e5d4fbb118999b526f8dd21f",
-        "Node name for S&R": "Hy3D21UseMultiViews",
+        "Node name for S&R": "Hy3D21UseMultiViews_AMD",
         "widget_ue_connectable": {}
       },
       "widgets_values": [
@@ -1583,7 +1583,7 @@
     },
     {
       "id": 7,
-      "type": "Hy3DInPaint",
+      "type": "Hy3DInPaint_AMD",
       "pos": [
         788.6650390625,
         1121.6439208984375
@@ -1649,7 +1649,7 @@
       "properties": {
         "aux_id": "visualbruno/ComfyUI-Hunyuan3d-2-1",
         "ver": "b25dbd8bc1adb6e1e699c3a2740d3a2358ee4752",
-        "Node name for S&R": "Hy3DInPaint",
+        "Node name for S&R": "Hy3DInPaint_AMD",
         "widget_ue_connectable": {}
       },
       "widgets_values": [
@@ -1688,7 +1688,7 @@
       ],
       "outputs": [],
       "properties": {
-        "cnr_id": "comfy-core",
+        "cnr_id": "ComfyUI-HY3Dv21-AMD",
         "ver": "0.3.41",
         "Node name for S&R": "Preview3D",
         "widget_ue_connectable": {},

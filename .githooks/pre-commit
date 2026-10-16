@@ -1,0 +1,25 @@
+#!/bin/sh
+# =============================================================================
+# Pre-commit hook to prevent committing files larger than 50 MB
+# Blocks model weights, 3D assets, or large binary artifacts.
+# =============================================================================
+LIMIT=52428800
+EXIT_CODE=0
+
+for FILE in $(git diff --cached --name-only --diff-filter=ACM); do
+    if [ -f "$FILE" ]; then
+        SIZE=$(wc -c < "$FILE" 2>/dev/null | tr -d ' ')
+        if [ -n "$SIZE" ] && [ "$SIZE" -gt "$LIMIT" ]; then
+            echo "================================================================="
+            echo "[SECURITY ERROR] Commit blocked!"
+            echo "File '$FILE' exceeds the 50 MB limit ($SIZE bytes)."
+            echo "Model checkpoints, weights, and large assets must NOT be committed."
+            echo "Ensure the file is listed in .gitignore and unstaged with:"
+            echo "  git rm --cached \"$FILE\""
+            echo "================================================================="
+            EXIT_CODE=1
+        fi
+    fi
+done
+
+exit $EXIT_CODE

@@ -6,7 +6,7 @@
   "nodes": [
     {
       "id": 9,
-      "type": "Hy3D21VAEDecode",
+      "type": "Hy3D21VAEDecode_AMD",
       "pos": [
         -357.4971923828125,
         746.3196411132812
@@ -42,7 +42,7 @@
       "properties": {
         "aux_id": "visualbruno/ComfyUI-Hunyuan3d-2-1",
         "ver": "e439689e4b67fb2af5f487ee26ef3a710be92658",
-        "Node name for S&R": "Hy3D21VAEDecode",
+        "Node name for S&R": "Hy3D21VAEDecode_AMD",
         "widget_ue_connectable": {}
       },
       "widgets_values": [
@@ -57,7 +57,7 @@
     },
     {
       "id": 19,
-      "type": "Hy3D21PostprocessMesh",
+      "type": "Hy3D21PostprocessMesh_AMD",
       "pos": [
         -13.057635307312012,
         745.6305541992188
@@ -88,7 +88,7 @@
       "properties": {
         "aux_id": "visualbruno/ComfyUI-Hunyuan3d-2-1",
         "ver": "b25dbd8bc1adb6e1e699c3a2740d3a2358ee4752",
-        "Node name for S&R": "Hy3D21PostprocessMesh",
+        "Node name for S&R": "Hy3D21PostprocessMesh_AMD",
         "widget_ue_connectable": {}
       },
       "widgets_values": [
@@ -101,7 +101,7 @@
     },
     {
       "id": 10,
-      "type": "Hy3DMeshGenerator",
+      "type": "Hy3D21MeshGenerator_AMD",
       "pos": [
         -694.09765625,
         818.04541015625
@@ -132,7 +132,7 @@
       "properties": {
         "aux_id": "visualbruno/ComfyUI-Hunyuan3d-2-1",
         "ver": "e439689e4b67fb2af5f487ee26ef3a710be92658",
-        "Node name for S&R": "Hy3DMeshGenerator",
+        "Node name for S&R": "Hy3D21MeshGenerator_AMD",
         "widget_ue_connectable": {}
       },
       "widgets_values": [
@@ -146,7 +146,7 @@
     },
     {
       "id": 14,
-      "type": "Hy3D21LoadImageWithTransparency",
+      "type": "Hy3D21LoadImageWithTransparency_AMD",
       "pos": [
         -1209.3524169921875,
         1088.94091796875
@@ -181,7 +181,7 @@
       "properties": {
         "aux_id": "visualbruno/ComfyUI-Hunyuan3d-2-1",
         "ver": "19e77b34abcadf80a782bc34ec447b8b366773d1",
-        "Node name for S&R": "Hy3D21LoadImageWithTransparency",
+        "Node name for S&R": "Hy3D21LoadImageWithTransparency_AMD",
         "widget_ue_connectable": {}
       },
       "widgets_values": [
@@ -191,7 +191,7 @@
     },
     {
       "id": 20,
-      "type": "Hy3D21ExportMesh",
+      "type": "Hy3D21ExportMesh_AMD",
       "pos": [
         -679.2012939453125,
         1084.147216796875
@@ -222,7 +222,7 @@
       "properties": {
         "aux_id": "visualbruno/ComfyUI-Hunyuan3d-2-1",
         "ver": "b25dbd8bc1adb6e1e699c3a2740d3a2358ee4752",
-        "Node name for S&R": "Hy3D21ExportMesh",
+        "Node name for S&R": "Hy3D21ExportMesh_AMD",
         "widget_ue_connectable": {}
       },
       "widgets_values": [
@@ -233,7 +233,7 @@
     },
     {
       "id": 4,
-      "type": "Hy3D21VAELoader",
+      "type": "Hy3D21VAELoader_AMD",
       "pos": [
         -682.2939453125,
         707.6591796875
@@ -265,7 +265,7 @@
       "properties": {
         "aux_id": "visualbruno/ComfyUI-Hunyuan3d-2-1",
         "ver": "e439689e4b67fb2af5f487ee26ef3a710be92658",
-        "Node name for S&R": "Hy3D21VAELoader",
+        "Node name for S&R": "Hy3D21VAELoader_AMD",
         "widget_ue_connectable": {}
       },
       "widgets_values": [
@@ -274,7 +274,7 @@
     },
     {
       "id": 21,
-      "type": "Hy3D21MeshlibDecimate",
+      "type": "Hy3D21MeshlibDecimate_AMD",
       "pos": [
         371.744384765625,
         751.075927734375
@@ -306,7 +306,7 @@
         "aux_id": "visualbruno/ComfyUI-Hunyuan3d-2-1",
         "ver": "da64c5d3337088d65802d6b78e689e00d1f3d1cd",
         "widget_ue_connectable": {},
-        "Node name for S&R": "Hy3D21MeshlibDecimate"
+        "Node name for S&R": "Hy3D21MeshlibDecimate_AMD"
       },
       "widgets_values": [
         16,
@@ -361,7 +361,7 @@
       ],
       "outputs": [],
       "properties": {
-        "cnr_id": "comfy-core",
+        "cnr_id": "ComfyUI-HY3Dv21-AMD",
         "ver": "0.3.41",
         "Node name for S&R": "Preview3D",
         "widget_ue_connectable": {},
@@ -373,9 +373,9 @@
             "z": 8.968481801129208
           },
           "target": {
-            "x": -0.00000371375023336331,
+            "x": -3.71375023336331e-06,
             "y": 2.4999948653356014,
-            "z": 0.0000021243006839016964
+            "z": 2.1243006839016964e-06
           },
           "zoom": 1,
           "cameraType": "perspective"
