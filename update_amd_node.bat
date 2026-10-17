@@ -1,6 +1,6 @@
 @echo off
 setlocal enabledelayedexpansion
-title ComfyUI-HY3Dv21-AMD - Upstream Sync & AMD Shielding
+title "ComfyUI-HY3Dv21-AMD - Upstream Sync and AMD Shielding"
 
 cd /d "%~dp0"
 
