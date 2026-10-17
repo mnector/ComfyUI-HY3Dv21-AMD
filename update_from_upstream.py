@@ -103,7 +103,7 @@ def rollback(last_good_commit, reason):
     print("!" * 70)
     run_cmd("git merge --abort", check=False)
     run_cmd(f"git reset --hard {last_good_commit}", check=False)
-    run_cmd("git clean -fd -e hy3dpaint/ckpt -e enforce_amd_patches.py -e update_from_upstream.py -e update_amd_node.bat -e .env.local", check=False)
+    run_cmd("git clean -fd -e hy3dpaint/ckpt -e enforce_amd_patches.py -e update_from_upstream.py -e update_amd_node.bat -e install.py -e example_workflows/workflow_hy3d21_amd.json -e .env.local", check=False)
     print("[OK] Rollback complete. Your working tree is 100% clean and functional.")
 
 
@@ -141,6 +141,12 @@ assert callable(rasterize), 'rasterize is not callable'
 from hy3dpaint.DifferentiableRenderer.MeshRender import MeshRender
 from hy3dpaint.DifferentiableRenderer.camera_utils import safe_matmul
 assert callable(safe_matmul), 'safe_matmul is not defined in camera_utils'
+
+# 6. Verify modern workflow protection
+wf_path = Path(node_root) / 'example_workflows' / 'workflow_hy3d21_amd.json'
+assert wf_path.exists(), 'workflow_hy3d21_amd.json missing from example_workflows/'
+legacy_wfs = [p.name for p in (Path(node_root) / 'example_workflows').glob('*.json') if p.name != 'workflow_hy3d21_amd.json']
+assert len(legacy_wfs) == 0, f'Found leaked legacy workflows: {{legacy_wfs}}'
 
 print(f'SMOKE_TEST_PASS: {{len(nodes.NODE_CLASS_MAPPINGS)}} AMD nodes registered successfully!')
 """
@@ -192,6 +198,10 @@ def main():
         if merge_check.stdout.strip() == upstream_head:
             print("[OK] Already up-to-date with upstream/main! Running patch validation...")
             run_cmd(f'"{python_exe}" enforce_amd_patches.py')
+            # Verify models via install.py
+            install_script = ROOT_DIR / "install.py"
+            if install_script.exists():
+                run_cmd(f'"{python_exe}" "{install_script}"')
             smoke_test(python_exe)
             print("[SUCCESS] Repository is up to date and all AMD protections are verified.")
             return 0
@@ -202,8 +212,33 @@ def main():
     print("[*] Merging upstream/main...")
     merge_res = run_cmd("git merge upstream/main --no-edit", check=False)
     if merge_res.returncode != 0:
-        rollback(last_good_commit, f"Git merge conflict detected with upstream/main:\n{merge_res.stderr or merge_res.stdout}")
-        return 1
+        # Check if conflicts can be auto-resolved (legacy workflows or merge=ours files)
+        status_out = run_cmd("git status --porcelain").stdout
+        conflicted_lines = [l for l in status_out.splitlines() if any(l.startswith(prefix) for prefix in ("UU", "UD", "DU", "AA", "UA", "AU"))]
+        can_auto_resolve = bool(conflicted_lines)
+        for cl in conflicted_lines:
+            file_part = cl[3:].strip()
+            # If it's a legacy workflow in example_workflows/ or root, discard it
+            if file_part.startswith("example_workflows/") and file_part != "example_workflows/workflow_hy3d21_amd.json":
+                run_cmd(f'git rm -f "{file_part}"', check=False)
+            elif file_part in ("workflow_hy3d21_amd.json",):
+                run_cmd(f'git rm -f "{file_part}"', check=False)
+            elif file_part in (
+                "README.md", "enforce_amd_patches.py", "update_from_upstream.py",
+                "update_amd_node.bat", "install.py", ".gitattributes", ".gitignore",
+                "pyproject.toml", "example_workflows/workflow_hy3d21_amd.json"
+            ):
+                run_cmd(f'git checkout --ours -- "{file_part}"', check=False)
+                run_cmd(f'git add "{file_part}"', check=False)
+            else:
+                can_auto_resolve = False
+                break
+
+        status_after = run_cmd("git status --porcelain").stdout
+        unresolved = [l for l in status_after.splitlines() if any(l.startswith(prefix) for prefix in ("UU", "UD", "DU", "AA", "UA", "AU"))]
+        if not can_auto_resolve or unresolved:
+            rollback(last_good_commit, f"Git merge conflict detected with upstream/main:\n{merge_res.stderr or merge_res.stdout}")
+            return 1
 
     # 5. Enforce AMD Patches
     print("[*] Applying AMD / ZLUDA shield and patch enforcement...")
@@ -211,6 +246,12 @@ def main():
     if patch_res.returncode != 0:
         rollback(last_good_commit, f"enforce_amd_patches.py failed:\n{patch_res.stderr or patch_res.stdout}")
         return 1
+
+    # 5.1 Ensure models (BiRefNet & RealESRGAN)
+    install_script = ROOT_DIR / "install.py"
+    if install_script.exists():
+        print("[*] Verifying models via install.py...")
+        run_cmd(f'"{python_exe}" "{install_script}"', check=False)
 
     # 6. Run Pre-flight Smoke Test
     try:

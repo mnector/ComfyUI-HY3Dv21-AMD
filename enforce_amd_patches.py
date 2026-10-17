@@ -349,6 +349,40 @@ def patch_gfx1201_sgemm_row_limits(root_dir: Path):
             print("[OK] MeshRender.py UV texel projection chunking is active.")
 
 
+def enforce_clean_workflows(root_dir: Path):
+    """
+    Ensures that only the modern BiRefNet-integrated workflow (workflow_hy3d21_amd.json)
+    exists in example_workflows/, and cleans up any legacy workflows that might be
+    re-introduced by an upstream git merge or pull.
+    """
+    example_dir = root_dir / "example_workflows"
+    if not example_dir.exists():
+        example_dir.mkdir(parents=True, exist_ok=True)
+
+    # Clean legacy root copy if present
+    root_legacy = root_dir / "workflow_hy3d21_amd.json"
+    if root_legacy.exists():
+        try:
+            root_legacy.unlink()
+            print("[+] Removed legacy redundant root workflow_hy3d21_amd.json")
+        except Exception:
+            pass
+
+    removed_count = 0
+    for wf in example_dir.glob("*.json"):
+        if wf.name != "workflow_hy3d21_amd.json":
+            try:
+                wf.unlink()
+                removed_count += 1
+            except Exception as e:
+                print(f"[!] Could not remove legacy workflow {wf.name}: {e}")
+
+    if removed_count > 0:
+        print(f"[+] Purged {removed_count} legacy upstream workflows. Kept modern workflow_hy3d21_amd.json intact.")
+    else:
+        print("[OK] example_workflows directory contains exclusively the modern workflow_hy3d21_amd.json.")
+
+
 def main():
     print("=" * 70)
     print(" ComfyUI-HY3Dv21-AMD: Enforcing AMD / ZLUDA Patches & Isolation")
@@ -366,6 +400,7 @@ def main():
     patch_requirements(req_file)
     patch_custom_rasterizer_fallback(ROOT_DIR)
     patch_gfx1201_sgemm_row_limits(ROOT_DIR)
+    enforce_clean_workflows(ROOT_DIR)
 
     print("=" * 70)
     print(" [SUCCESS] All AMD & ZLUDA safeguards are 100% active and enforced.")

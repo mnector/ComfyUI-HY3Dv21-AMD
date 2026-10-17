@@ -65,12 +65,17 @@ The community's go-to wrapper repo ([`visualbruno/ComfyUI-Hunyuan3d-2-1`](https:
 ```mermaid
 flowchart TD
     classDef inputStyle fill:#2d3748,stroke:#4a5568,stroke-width:2px,color:#fff;
+    classDef bgStyle fill:#2c5282,stroke:#4299e1,stroke-width:2px,color:#fff;
     classDef shapeStyle fill:#1a365d,stroke:#2b6cb0,stroke-width:2px,color:#fff;
     classDef paintStyle fill:#742a2a,stroke:#c53030,stroke-width:2px,color:#fff;
     classDef amdStyle fill:#7b341e,stroke:#dd6b20,stroke-width:2px,color:#fff;
     classDef outStyle fill:#22543d,stroke:#38a169,stroke-width:2px,color:#fff;
 
-    A["🖼️ 2D Input Image (RGBA)"]:::inputStyle --> B["Hunyuan 3D 2.1 DiT Generator [AMD]"]:::shapeStyle
+    Raw["🖼️ Raw 2D Input Image (Any Background)"]:::inputStyle --> BG["✂️ BiRefNet Background Removal (LoadBackgroundRemovalModel)"]:::bgStyle
+    BG --> Crop["📐 Smart Auto-Crop to Mask (Pad Factor: 1.05)"]:::bgStyle
+    Crop --> A["✨ Clean RGBA Subject Image"]:::inputStyle
+
+    A --> B["Hunyuan 3D 2.1 DiT Generator [AMD]"]:::shapeStyle
     B --> C["Hunyuan 3D 2.1 VAE Decoder [AMD]"]:::shapeStyle
     C --> D["Raw Untextured Trimesh Geometry"]:::shapeStyle
 
@@ -180,13 +185,19 @@ Run this in your ComfyUI environment:
 
 ---
 
-## 📁 Folder Structure & Official Model Weights
+## 📁 Folder Structure & Required Model Weights
 
-Download the official model weights from Hugging Face ([`tencent/Hunyuan3D-2.1`](https://huggingface.co/tencent/Hunyuan3D-2.1)) and place them into the following directories:
+### Automated Model Setup
+Running `update_amd_node.bat` or `python install.py` will automatically verify and download the required auxiliary models (`birefnet.safetensors` and `RealESRGAN_x4plus.pth`) if they are missing.
+
+### Manual Download & Directory Mapping
+Download the official model weights from Hugging Face and place them into the following directories:
 
 ```
 [ComfyUI_Root]/
 ├── models/
+│   ├── background_removal/
+│   │   └── birefnet.safetensors          <-- BiRefNet Alpha Cutout (444 MB)
 │   ├── diffusion_models/
 │   │   └── hunyuan3d-dit-v2-1.ckpt        <-- Shape DiT weights
 │   ├── vae/
@@ -198,13 +209,42 @@ Download the official model weights from Hugging Face ([`tencent/Hunyuan3D-2.1`]
 │           └── ...
 └── custom_nodes/
     └── ComfyUI-HY3Dv21-AMD/
+        ├── example_workflows/
+        │   └── workflow_hy3d21_amd.json   <-- Production-ready all-in-one workflow
         └── hy3dpaint/
             └── ckpt/
-                └── RealESRGAN_x4plus.pth   <-- UV texture upscaler (67 MB)
+                └── RealESRGAN_x4plus.pth  <-- UV texture upscaler (67 MB)
 ```
 
-> [!TIP]
-> Download `RealESRGAN_x4plus.pth` directly into `hy3dpaint/ckpt/`. Our strict `.gitignore` and security `pre-commit` hook will ensure you never accidentally push heavy weights or 3D test assets to GitHub if you make your own commits.
+### Direct Download Links
+| Model | Size | Purpose | Download Link |
+|---|---|---|---|
+| **BiRefNet** (`birefnet.safetensors`) | 444 MB | Clean alpha cutout & subject isolation | [HuggingFace: Comfy-Org/BiRefNet](https://huggingface.co/Comfy-Org/BiRefNet/resolve/main/background_removal/birefnet.safetensors) |
+| **Hunyuan3D DiT** (`hunyuan3d-dit-v2-1.ckpt`) | ~2.5 GB | 3D shape generation from image | [HuggingFace: tencent/Hunyuan3D-2.1](https://huggingface.co/tencent/Hunyuan3D-2.1) |
+| **Hunyuan3D VAE** (`hunyuan3d-vae-v2-1.ckpt`) | ~400 MB | 3D volume decoding to Trimesh | [HuggingFace: tencent/Hunyuan3D-2.1](https://huggingface.co/tencent/Hunyuan3D-2.1) |
+| **Hunyuan3D PaintPBR** (`hunyuan3d-paintpbr-v2-1/`) | ~6.5 GB | Multiview texture diffusion pipeline | [HuggingFace: tencent/Hunyuan3D-2.1](https://huggingface.co/tencent/Hunyuan3D-2.1) |
+| **Real-ESRGAN** (`RealESRGAN_x4plus.pth`) | 67 MB | High-res UV texture upscaling | [GitHub: xinntao/Real-ESRGAN](https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth) |
+
+> [!NOTE]
+> The `"Load Background Removal Model"` and `"Remove Background"` nodes used in our workflow are built natively into modern ComfyUI Core (`comfy-core` via `comfy_extras/nodes_bg_removal.py`). No separate rembg repository is needed!
+
+---
+
+## 🎨 Ready-to-Use Production Workflow
+
+This repository includes a battle-tested, end-to-end generation workflow located at:
+📁 **[`example_workflows/workflow_hy3d21_amd.json`](example_workflows/workflow_hy3d21_amd.json)**
+
+Simply drag-and-drop this JSON directly into your ComfyUI browser canvas.
+
+### Workflow Stages:
+1. **Remove Background:** Loads `birefnet.safetensors` to segment any subject from its background, applies a customizable `Pad Factor` (default `1.05`), and auto-crops to mask.
+2. **Mesh Generation:** Feeds the cleaned RGBA image into `Hunyuan 3D 2.1 DiT Generator [AMD]`, decodes the mesh via `Hunyuan 3D 2.1 VAE Decoder [AMD]`, post-processes the trimesh, and computes UV seams with `Hunyuan 3D 2.1 Mesh UV Wrap [AMD]` (`xatlas`).
+3. **Mesh Texturing (PBR):** Generates 6 consistent camera views with `Hunyuan 3D 2.1 MultiViews Generator [AMD]`, projects and bakes UV coordinates with our ZLUDA-shielded differentiable rasterizer (`Hunyuan 3D 2.1 Bake MultiViews [AMD]`), inpaints unobserved texels (`Hunyuan 3D 2.1 InPaint [AMD]`), and exports a complete `.GLB` / `.OBJ` with 4K PBR material maps.
+
+### Recommended Helper Node Packs (via ComfyUI Manager):
+- **[`rgthree-comfy`](https://github.com/rgthree/rgthree-comfy):** Used for the randomized `Seed (rgthree)` controls.
+- **[`comfyui-easy-use`](https://github.com/yolain/ComfyUI-Easy-Use):** Used for the `Pad Factor` float node.
 
 ---
 
